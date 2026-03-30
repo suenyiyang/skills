@@ -1,0 +1,24 @@
+{
+  "name": "yiyang-skills",
+  "owner": {
+    "name": "Yiyang (轶扬)",
+    "email": "suenyiyang@gmail.com"
+  },
+  "metadata": {
+    "description": "Obsidian publishing, Excalidraw export, R2 upload, and Feishu integration skills for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "yiyang-skills",
+      "description": "Obsidian publishing pipeline, Excalidraw export, R2 CDN upload, and Feishu doc publishing",
+      "source": "./",
+      "skills": [
+        "./skills/yiyang-r2-upload",
+        "./skills/yiyang-excalidraw-export",
+        "./skills/yiyang-feishu-publish",
+        "./skills/yiyang-obsidian-image-resolver"
+      ]
+    }
+  ]
+}
