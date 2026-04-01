@@ -131,6 +131,7 @@ Descriptions should be slightly "pushy" to improve triggering. Include both Engl
 | `yiyang-excalidraw-export` | Export .excalidraw/.excalidraw.md to PNG | EXTEND: `export_output_dir` |
 | `yiyang-obsidian-image-resolver` | Resolve Obsidian wiki-links to CDN URLs | EXTEND: `vault_path` |
 | `yiyang-feishu-publish` | Publish markdown to Feishu docs via lark-cli | EXTEND: `default_folder`, `default_wiki_space` |
+| `yiyang-package-check` | Scan for specific npm package versions across caches and node_modules | None |
 
 ### Composability
 

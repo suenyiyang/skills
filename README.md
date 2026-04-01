@@ -1,6 +1,6 @@
 # yiyang-skills
 
-Claude Code skills for Obsidian publishing, Excalidraw export, Cloudflare R2 upload, and Feishu integration.
+Claude Code skills for Obsidian publishing, Excalidraw export, Cloudflare R2 upload, Feishu integration, and npm package security scanning.
 
 ## Skills
 
@@ -10,7 +10,7 @@ Claude Code skills for Obsidian publishing, Excalidraw export, Cloudflare R2 upl
 | **yiyang-excalidraw-export** | Export Obsidian Excalidraw `.excalidraw` and `.excalidraw.md` files to PNG. Handles LZ-String compressed data. |
 | **yiyang-obsidian-image-resolver** | Process Obsidian markdown for external publishing — resolves `![[wiki-links]]`, exports Excalidraw drawings, uploads to R2, outputs clean markdown with CDN URLs. |
 | **yiyang-feishu-publish** | Publish markdown to Feishu documents via `lark-cli`. Converts markdown to Feishu blocks with automatic image handling. |
-| **yiyang-skill-creator** | Scaffold new `yiyang-*` skills following shared conventions (recursive EXTEND.md config, .env secrets, JSON output). |
+| **yiyang-package-check** | Scan local machine for specific npm package versions across all package manager caches (npm, pnpm, yarn, bun) and node_modules. Useful for supply-chain attack response. |
 
 ## Install
 

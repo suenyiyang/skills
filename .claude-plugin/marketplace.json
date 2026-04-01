@@ -11,13 +11,14 @@
   "plugins": [
     {
       "name": "yiyang-skills",
-      "description": "Obsidian publishing pipeline, Excalidraw export, R2 CDN upload, and Feishu doc publishing",
+      "description": "Obsidian publishing pipeline, Excalidraw export, R2 CDN upload, Feishu doc publishing, and npm package security scanner",
       "source": "./",
       "skills": [
         "./skills/yiyang-r2-upload",
         "./skills/yiyang-excalidraw-export",
         "./skills/yiyang-feishu-publish",
-        "./skills/yiyang-obsidian-image-resolver"
+        "./skills/yiyang-obsidian-image-resolver",
+        "./skills/yiyang-package-check"
       ]
     }
   ]
