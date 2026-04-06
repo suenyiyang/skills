@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Obsidian publishing, Excalidraw export, R2 upload, and Feishu integration skills for Claude Code",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
     {
@@ -18,7 +18,8 @@
         "./skills/yiyang-excalidraw-export",
         "./skills/yiyang-feishu-publish",
         "./skills/yiyang-obsidian-image-resolver",
-        "./skills/yiyang-package-check"
+        "./skills/yiyang-package-check",
+        "./skills/yiyang-video-gen"
       ]
     }
   ]
