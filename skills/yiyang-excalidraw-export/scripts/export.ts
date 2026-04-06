@@ -131,20 +131,14 @@ if (!existsSync(inputPath)) {
 }
 
 // ---------------------------------------------------------------------------
-// Main: Load into excalidraw.com via drop event, then export via built-in UI
+// Main: Use @excalidraw/excalidraw's exportToSvg via headless browser + esm.sh
+// This properly handles CJK font loading and text measurement.
 // ---------------------------------------------------------------------------
 
 try {
   const data = await parseExcalidrawFile(inputPath);
-  const jsonStr = JSON.stringify(data);
 
   await mkdir(dirname(outputPath), { recursive: true });
-
-  // Write to temp file for drag-and-drop
-  const tmpDir = join(tmpdir(), `excalidraw-export-${Date.now()}`);
-  await mkdir(tmpDir, { recursive: true });
-  const tmpFile = join(tmpDir, "drawing.excalidraw");
-  await writeFile(tmpFile, jsonStr);
 
   const { chromium } = await import("playwright");
   const browser = await chromium.launch({ headless: true });
@@ -154,127 +148,63 @@ try {
   });
   const page = await context.newPage();
 
-  // Navigate to excalidraw.com
-  await page.goto("https://excalidraw.com/", { waitUntil: "networkidle", timeout: 60_000 });
+  // Use a minimal HTML page — we only need a DOM environment to run exportToSvg
+  await page.setContent(`<!DOCTYPE html><html><body><div id="container"></div></body></html>`);
 
-  // Wait for canvas to appear
-  await page.waitForSelector("canvas.interactive", { timeout: 30_000 });
-  await page.waitForTimeout(2000);
+  // Import @excalidraw/excalidraw from esm.sh and call exportToSvg
+  const svgMarkup = await page.evaluate(async (drawingData) => {
+    // Dynamically import the Excalidraw library from esm.sh CDN
+    const { exportToSvg } = await import(
+      // @ts-ignore
+      "https://esm.sh/@excalidraw/excalidraw@latest"
+    );
 
-  // Load the file via simulated drag-and-drop onto the canvas
-  const canvas = page.locator("canvas.interactive");
+    const elements = drawingData.elements || [];
+    const appState = drawingData.appState || {};
+    const files = drawingData.files || {};
 
-  // Use Playwright's built-in file drop
-  const dataTransfer = await page.evaluateHandle((json) => {
-    const dt = new DataTransfer();
-    const file = new File([json], "drawing.excalidraw", { type: "application/json" });
-    dt.items.add(file);
-    return dt;
-  }, jsonStr);
+    // Call exportToSvg with the drawing data
+    const svg: SVGSVGElement = await exportToSvg({
+      elements,
+      appState: {
+        ...appState,
+        exportWithDarkMode: false,
+        exportBackground: true,
+        viewBackgroundColor: appState.viewBackgroundColor || "#ffffff",
+      },
+      files,
+    });
 
-  await canvas.dispatchEvent("drop", { dataTransfer });
+    // Wait for all fonts to be loaded
+    await document.fonts.ready;
 
-  // Wait for rendering to complete
-  await page.waitForTimeout(3000);
+    // Insert SVG into DOM so fonts render
+    const container = document.getElementById("container")!;
+    container.appendChild(svg);
 
-  // Use Excalidraw's built-in export via keyboard shortcut
-  // Ctrl+Shift+E opens the export dialog, then we capture the export image
-  // But a cleaner approach: use "select all" then "copy as PNG" or use the
-  // canvas with proper cropping.
+    // Give browser a moment to render fonts
+    await new Promise((r) => setTimeout(r, 2000));
 
-  // First, fit all content to view: Ctrl+Shift+1 (zoom to fit)
-  await page.keyboard.press("Control+Shift+Digit1");
+    return new XMLSerializer().serializeToString(svg);
+  }, data);
+
+  // Now screenshot the SVG element
+  const svgElement = page.locator("#container > svg");
+  await svgElement.waitFor({ state: "visible", timeout: 10_000 });
+
+  // Wait a bit more for font rendering
   await page.waitForTimeout(1000);
 
-  // Select all elements: Ctrl+A
-  await page.keyboard.press("Control+a");
-  await page.waitForTimeout(500);
-
-  // Get the content bounds from the selection, then crop the canvas
-  const pngBase64 = await page.evaluate(async () => {
-    // Find the static canvas
-    const canvases = document.querySelectorAll("canvas");
-    let staticCanvas: HTMLCanvasElement | null = null;
-    for (const c of canvases) {
-      if (!c.classList.contains("interactive")) {
-        staticCanvas = c as HTMLCanvasElement;
-        break;
-      }
-    }
-    if (!staticCanvas) staticCanvas = canvases[0] as HTMLCanvasElement;
-    if (!staticCanvas) throw new Error("No canvas found");
-
-    // Get canvas image data and find non-white/non-transparent content bounds
-    const ctx = staticCanvas.getContext("2d");
-    if (!ctx) throw new Error("No 2d context");
-
-    const w = staticCanvas.width;
-    const h = staticCanvas.height;
-    const imageData = ctx.getImageData(0, 0, w, h);
-    const data = imageData.data;
-
-    // The background color (Excalidraw default white: 255,255,255)
-    let minX = w, minY = h, maxX = 0, maxY = 0;
-    const padding = 40; // padding around content
-
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        const i = (y * w + x) * 4;
-        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-        // Check if pixel is NOT the background (white with full alpha)
-        // Also ignore fully transparent pixels
-        if (a > 0 && !(r >= 250 && g >= 250 && b >= 250)) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
-        }
-      }
-    }
-
-    if (maxX <= minX || maxY <= minY) {
-      // No content found — return full canvas
-      return staticCanvas.toDataURL("image/png");
-    }
-
-    // Add padding
-    minX = Math.max(0, minX - padding);
-    minY = Math.max(0, minY - padding);
-    maxX = Math.min(w - 1, maxX + padding);
-    maxY = Math.min(h - 1, maxY + padding);
-
-    const cropW = maxX - minX + 1;
-    const cropH = maxY - minY + 1;
-
-    // Create cropped canvas
-    const cropCanvas = document.createElement("canvas");
-    cropCanvas.width = cropW;
-    cropCanvas.height = cropH;
-    const cropCtx = cropCanvas.getContext("2d")!;
-    // Fill with white background
-    cropCtx.fillStyle = "#ffffff";
-    cropCtx.fillRect(0, 0, cropW, cropH);
-    cropCtx.drawImage(staticCanvas, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
-
-    return cropCanvas.toDataURL("image/png");
-  });
+  // Screenshot the SVG element directly to PNG
+  await svgElement.screenshot({ path: outputPath, type: "png" });
 
   await browser.close();
-  await rm(tmpDir, { recursive: true, force: true });
-
-  if (!pngBase64 || pngBase64 === "data:,") {
-    throw new Error("Canvas export returned empty image");
-  }
-
-  // Save PNG
-  const b64 = pngBase64.replace(/^data:image\/png;base64,/, "");
-  await writeFile(outputPath, Buffer.from(b64, "base64"));
 
   console.log(JSON.stringify({
     output: outputPath,
     source: inputPath,
     format: inputPath.endsWith(".excalidraw.md") ? "excalidraw.md" : "excalidraw",
-    method: "excalidraw-com-drop",
+    method: "exportToSvg-esm",
     success: true,
   }));
 } catch (e: any) {
