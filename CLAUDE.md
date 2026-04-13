@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Claude Code plugin providing Obsidian publishing, Excalidraw export, R2 upload, and Feishu integration skills. Version: **1.1.0**.
+Claude Code plugin providing Obsidian publishing, Excalidraw export, R2 upload, Feishu integration, Volcengine video generation, and WeChat article import skills. Version: **1.2.0**.
 
 ## Architecture
 
@@ -133,6 +133,7 @@ Descriptions should be slightly "pushy" to improve triggering. Include both Engl
 | `yiyang-feishu-publish` | Publish markdown to Feishu docs via lark-cli | EXTEND: `default_folder`, `default_wiki_space` |
 | `yiyang-package-check` | Scan for specific npm package versions across caches and node_modules | None |
 | `yiyang-video-gen` | Generate videos via Volcengine Ark (Seedance) API | EXTEND: `model`, `output_dir` / ENV: `ARK_API_KEY` |
+| `yiyang-wechat-to-markdown` | Convert WeChat Official Account article URL to local markdown + watermarked PNG images | EXTEND: `watermark` (on/off) |
 
 ### Composability
 
