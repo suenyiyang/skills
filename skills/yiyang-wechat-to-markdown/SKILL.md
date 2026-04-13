@@ -41,9 +41,35 @@ Flags:
 |------|----------|---------|---------|
 | `--url <url>` | yes | — | WeChat article URL (`mp.weixin.qq.com/s/...`) |
 | `--out <dir>` | yes | — | Output directory. Will be created. Writes `article.md` + `images/img-*.png`. |
-| `--skip-watermark` | no | false | Fall back to the clean (non-watermarked) image token. Useful for non-「原创」 articles that have no `watermark_info`. |
+| `--watermark <on\|off>` | no | see config resolution below | Override the watermark preference for this run. Accepts `on` / `off` (also `true` / `false`, `yes` / `no`, `1` / `0`). |
 | `--keep-straight-quotes` | no | false | Disable `"..."` → `"..."` normalization. |
-| `--dry-run` | no | false | Print the plan (title, image URLs, output paths) as JSON without writing files. |
+| `--dry-run` | no | false | Print the plan (title, image URLs, output paths, effective watermark source) as JSON without writing files. |
+
+## Configuration: watermark preference
+
+The 「原创」 watermark overlay may or may not be what you want depending on where the article ends up. Keep it when republishing to personal wikis where attribution matters; drop it when re-voicing content into internal docs or when original attribution would be visually noisy. The preference is resolved in this order (earlier wins):
+
+1. `--watermark on|off` CLI flag
+2. `watermark: on|off` in the nearest `EXTEND.md` (recursive lookup from cwd to `~/`, per repo convention)
+3. Built-in default: `on`
+
+Example `.yiyang-skills/yiyang-wechat-to-markdown/EXTEND.md`:
+
+```markdown
+---
+watermark: off
+---
+```
+
+Place it next to your project (`<project>/.yiyang-skills/yiyang-wechat-to-markdown/EXTEND.md`) to scope the preference to that project, or in `~/.yiyang-skills/yiyang-wechat-to-markdown/EXTEND.md` to set a global default.
+
+The script reports which source won in its JSON output:
+
+```json
+"watermark": { "enabled": true, "source": "extend.md" }
+```
+
+Set up guidance: `references/config/first-time-setup.md`.
 
 ## Output
 
@@ -106,7 +132,7 @@ The script does five things:
 1. **Fetch metadata via defuddle** — `defuddle parse <url> --md` (body) and `-p title` (real title). Defuddle runs a headless browser, so it clears the verification page that plain `fetch` / `WebFetch` cannot.
 2. **Fetch the raw article HTML** — `curl <url>` with a real User-Agent, so we can grep for `watermark_info` blocks.
 3. **Pair watermark tokens with body images** — the HTML contains `cdn_url: '...'` entries in order: `[main_1, wm_1, main_2, wm_2, ...]`. Each body image has exactly one pair. Build watermarked URLs: `https://mmbiz.qpic.cn/(sz_)?mmbiz_png/<wm_token>/640?wx_fmt=png&from=appmsg&watermark=1&tp=webp&wxfrom=5&wx_lazy=1`.
-4. **Download + decode** — `curl` each watermarked URL to webp, then `dwebp` to PNG. Fall back to the non-watermarked URL if the `watermark_info` block is missing (non-原创 articles) or `--skip-watermark` is set.
+4. **Download + decode** — `curl` each watermarked URL to webp, then `dwebp` to PNG. Fall back to the non-watermarked URL if the `watermark_info` block is missing (non-原创 articles) or the watermark preference is set to `off`.
 5. **Rewrite image URLs + normalize quotes** — Replace each `![alt](remote_url)` in the defuddle markdown with `![alt](./images/img-N.png)`. For each line outside HTML tags, alternate-toggle `"` → `"` / `"` to restore Chinese curly quotes, but only if the line contains any CJK character (so English prose stays untouched).
 
 ## Edge cases handled
