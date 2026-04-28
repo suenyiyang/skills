@@ -5,13 +5,13 @@
     "email": "suenyiyang@gmail.com"
   },
   "metadata": {
-    "description": "Obsidian publishing, Excalidraw export, R2 upload, Feishu integration, Volcengine video generation, and WeChat article import skills for Claude Code",
-    "version": "1.2.0"
+    "description": "Obsidian publishing, Excalidraw export, R2 upload, Feishu integration, Volcengine video generation, WeChat article import, and ChineseBQB meme finder skills for Claude Code",
+    "version": "1.3.0"
   },
   "plugins": [
     {
       "name": "yiyang-skills",
-      "description": "Obsidian publishing pipeline, Excalidraw export, R2 CDN upload, Feishu doc publishing, npm package security scanner, Volcengine Ark video generation, and WeChat article → markdown converter",
+      "description": "Obsidian publishing pipeline, Excalidraw export, R2 CDN upload, Feishu doc publishing, npm package security scanner, Volcengine Ark video generation, WeChat article → markdown converter, and ChineseBQB 表情包 finder",
       "source": "./",
       "skills": [
         "./skills/yiyang-r2-upload",
@@ -20,7 +20,8 @@
         "./skills/yiyang-obsidian-image-resolver",
         "./skills/yiyang-package-check",
         "./skills/yiyang-video-gen",
-        "./skills/yiyang-wechat-to-markdown"
+        "./skills/yiyang-wechat-to-markdown",
+        "./skills/yiyang-find-bqb"
       ]
     }
   ]

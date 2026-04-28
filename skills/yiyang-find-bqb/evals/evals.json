@@ -1,0 +1,53 @@
+{
+  "skill_name": "yiyang-find-bqb",
+  "evals": [
+    {
+      "id": 0,
+      "name": "smug-told-you-so",
+      "prompt": "I called this exact bug last week and the team ignored me. now it's blowing up in prod. find me a sticker that captures the smug 'I told you so' energy — I want to send it in slack.",
+      "expected_output": "Top candidate memes downloaded into /tmp/yiyang-find-bqb/<some-label>/ with Chinese filenames matching smug/told-you-so vibes (得意, 假笑, 早就说了, 滑稽). The model presents the paths to the user without picking one for them.",
+      "assertions": [
+        { "id": "out_dir_under_tmp_yiyang_find_bqb", "text": "Output directory is under /tmp/yiyang-find-bqb/" },
+        { "id": "at_least_3_candidates_downloaded", "text": "At least 3 candidate image files exist in the output directory" },
+        { "id": "all_files_non_empty", "text": "Every downloaded image file is non-empty (>0 bytes)" },
+        { "id": "filenames_contain_chinese", "text": "At least one downloaded filename contains CJK Chinese characters" },
+        { "id": "keywords_contain_chinese", "text": "Keywords used contain CJK Chinese characters (not English-only)" },
+        { "id": "final_response_includes_paths", "text": "Final response includes at least one /tmp/yiyang-find-bqb/... file path" },
+        { "id": "final_response_offers_choice", "text": "Final response presents multiple candidates without picking one for the user" }
+      ],
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "tired-end-of-week",
+      "prompt": "I just spent 3 hours debugging an issue that turned out to be a missing comma. it's friday and I'm fried. send me a 表情包 that says exactly that.",
+      "expected_output": "Top candidate memes downloaded into /tmp/yiyang-find-bqb/<some-label>/ matching tired/done-with-it vibes (累, 摆烂, 躺平, 摸鱼, 瘫). Paths surfaced to the user for them to pick.",
+      "assertions": [
+        { "id": "out_dir_under_tmp_yiyang_find_bqb", "text": "Output directory is under /tmp/yiyang-find-bqb/" },
+        { "id": "at_least_3_candidates_downloaded", "text": "At least 3 candidate image files exist in the output directory" },
+        { "id": "all_files_non_empty", "text": "Every downloaded image file is non-empty (>0 bytes)" },
+        { "id": "filenames_contain_chinese", "text": "At least one downloaded filename contains CJK Chinese characters" },
+        { "id": "keywords_contain_chinese", "text": "Keywords used contain CJK Chinese characters (not English-only)" },
+        { "id": "final_response_includes_paths", "text": "Final response includes at least one /tmp/yiyang-find-bqb/... file path" },
+        { "id": "final_response_offers_choice", "text": "Final response presents multiple candidates without picking one for the user" }
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "speechless-pm-deadline",
+      "prompt": "我 PM 刚跟我说他要两天内上线这个功能。给我来个表情包表达一下我现在的心情。",
+      "expected_output": "Top candidate memes downloaded into /tmp/yiyang-find-bqb/<some-label>/ matching speechless/disbelief vibes (无语, 黑人问号, 震惊, 白眼, ?). Paths surfaced to the user.",
+      "assertions": [
+        { "id": "out_dir_under_tmp_yiyang_find_bqb", "text": "Output directory is under /tmp/yiyang-find-bqb/" },
+        { "id": "at_least_3_candidates_downloaded", "text": "At least 3 candidate image files exist in the output directory" },
+        { "id": "all_files_non_empty", "text": "Every downloaded image file is non-empty (>0 bytes)" },
+        { "id": "filenames_contain_chinese", "text": "At least one downloaded filename contains CJK Chinese characters" },
+        { "id": "keywords_contain_chinese", "text": "Keywords used contain CJK Chinese characters (not English-only)" },
+        { "id": "final_response_includes_paths", "text": "Final response includes at least one /tmp/yiyang-find-bqb/... file path" },
+        { "id": "final_response_offers_choice", "text": "Final response presents multiple candidates without picking one for the user" }
+      ],
+      "files": []
+    }
+  ]
+}
