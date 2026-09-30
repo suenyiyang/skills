@@ -1,81 +1,56 @@
 # yiyang-skills
 
-Claude Code skills for Obsidian publishing, Excalidraw export, Cloudflare R2 upload, Feishu integration, and npm package security scanning.
+Personal agent skills for content creation and publishing.
 
 ## Skills
 
+### [Content](./skills/content/README.md)
+
+The content creation pipeline: raw material in, published documents out.
+
 | Skill | Description |
 |-------|-------------|
-| **yiyang-r2-upload** | Upload files to Cloudflare R2 with SHA-256 hash-based deduplication. Content-addressed URLs, no duplicate uploads. |
-| **yiyang-excalidraw-export** | Export Obsidian Excalidraw `.excalidraw` and `.excalidraw.md` files to PNG. Handles LZ-String compressed data. |
-| **yiyang-obsidian-image-resolver** | Process Obsidian markdown for external publishing — resolves `![[wiki-links]]`, exports Excalidraw drawings, uploads to R2, outputs clean markdown with CDN URLs. |
-| **yiyang-feishu-publish** | Publish markdown to Feishu documents via `lark-cli`. Converts markdown to Feishu blocks with automatic image handling. |
-| **yiyang-package-check** | Scan local machine for specific npm package versions across all package manager caches (npm, pnpm, yarn, bun) and node_modules. Useful for supply-chain attack response. |
+| **[wechat-to-markdown](./skills/content/wechat-to-markdown/SKILL.md)** | Convert a WeChat Official Account article URL into clean local markdown plus watermarked PNG images. |
+| **[obsidian-image-resolver](./skills/content/obsidian-image-resolver/SKILL.md)** | Resolve Obsidian `![[wiki-link]]` images, export Excalidraw drawings, upload to R2 via the cf CLI, output standard markdown with CDN URLs. |
+| **[excalidraw-export](./skills/content/excalidraw-export/SKILL.md)** | Export `.excalidraw` / `.excalidraw.md` files to PNG (handles LZ-String compressed data). |
+| **[feishu-publish](./skills/content/feishu-publish/SKILL.md)** | Publish markdown to Feishu documents via `lark-cli`. |
+
+### [Tools](./skills/tools/README.md)
+
+| Skill | Description |
+|-------|-------------|
+| **[video-gen](./skills/tools/video-gen/SKILL.md)** | Generate videos with the Volcengine Ark (火山方舟) Seedance API. |
 
 ## Install
 
 ```bash
-/plugin marketplace add suenyiyang/yiyang-skills
+npx skills@latest add suenyiyang/skills
 ```
 
-Or add to your `~/.claude/settings.json`:
+### Local development
 
-```json
-{
-  "extraKnownMarketplaces": {
-    "yiyang-skills": {
-      "source": {
-        "source": "github",
-        "repo": "suenyiyang/yiyang-skills"
-      }
-    }
-  },
-  "enabledPlugins": {
-    "yiyang-skills@yiyang-skills": true
-  }
-}
+Symlink every skill into `~/.agents/skills`:
+
+```bash
+scripts/link-skills.sh
 ```
 
 ## Configuration
 
-Skills use a two-layer config system:
+Skills use a two-layer config system, stored outside this repo:
 
-- **Preferences** (`EXTEND.md`) — Non-sensitive settings. Resolved recursively from `cwd` up to `~/`, allowing per-project overrides.
+- **Preferences** (`EXTEND.md`) — Non-sensitive settings. Resolved recursively from `cwd` up to `~/`, allowing per-project overrides: `<dir>/.yiyang-skills/<skill-name>/EXTEND.md`.
 - **Secrets** (`.env`) — API keys and tokens. Stored only at `~/.yiyang-skills/<skill-name>/.env` (not recursive, for security).
 
-Config is stored in `~/.yiyang-skills/`, not in this repo. Each skill has a first-time setup flow that guides you through configuration.
+Each skill has a first-time setup flow (`references/config/first-time-setup.md`) that guides you through configuration.
 
-### Example: Setting up R2 upload
-
-On first use, the skill will prompt you to configure:
-
-```
-~/.yiyang-skills/yiyang-r2-upload/.env        # R2 API credentials
-~/.yiyang-skills/yiyang-r2-upload/EXTEND.md   # Bucket name, public URL, prefix
-```
-
-## Publishing Pipeline
-
-The skills compose into an Obsidian-to-anywhere publishing pipeline:
-
-```
-Obsidian note (.md with ![[wiki-links]])
-  |
-  v
-yiyang-obsidian-image-resolver
-  |-- resolves ![[image.png]] to vault files
-  |-- exports ![[drawing.excalidraw]] to PNG (via yiyang-excalidraw-export)
-  |-- uploads all images to R2 CDN (via yiyang-r2-upload)
-  |-- outputs clean markdown with remote URLs
-  |
-  v
-yiyang-feishu-publish  (or any other target)
-```
+R2 uploads use the [cf CLI](https://developers.cloudflare.com/cloudflare-cli/) (`npm i -g cf`, then `cf auth login`). No R2 API tokens are stored in config.
 
 ## Requirements
 
-- [Bun](https://bun.sh/) (or Node.js with npx)
-- [lark-cli](https://www.npmjs.com/package/@larksuite/cli) (for Feishu publishing only)
+- [Bun](https://bun.sh/) (or `npx -y bun`)
+- [cf](https://developers.cloudflare.com/cloudflare-cli/) (for R2 uploads in `obsidian-image-resolver`)
+- [lark-cli](https://www.npmjs.com/package/@larksuite/cli) (for `feishu-publish`)
 
 ## License
 
